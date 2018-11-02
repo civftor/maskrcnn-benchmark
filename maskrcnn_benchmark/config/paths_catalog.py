@@ -5,7 +5,8 @@ import os
 
 
 class DatasetCatalog(object):
-    DATA_DIR = "datasets"
+    # DATA_DIR = "datasets"
+    DATA_DIR = "/home/jario/dataset"
 
     DATASETS = {
         "coco_2014_train": (
