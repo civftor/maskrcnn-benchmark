@@ -36,6 +36,9 @@ class SpireDataset(data.Dataset):
 
         self.transforms = transforms
 
+    def get_categories(self):
+        return self.categories
+
     def __len__(self):
         return len(self.anns)
     
