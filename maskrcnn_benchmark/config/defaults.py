@@ -264,6 +264,8 @@ _C.TEST.IMS_PER_BATCH = 8
 # ---------------------------------------------------------------------------- #
 # Misc options
 # ---------------------------------------------------------------------------- #
+_C.DATA_DIR = "."
+_C.MODEL_DIR = "/home/jario/spire-net-1810/maskrcnn-benchmark-models"
 _C.OUTPUT_DIR = "."
 
 _C.PATHS_CATALOG = os.path.join(os.path.dirname(__file__), "paths_catalog.py")

@@ -2,11 +2,12 @@
 """Centralized catalog of paths."""
 
 import os
+import defaults
 
 
 class DatasetCatalog(object):
     # DATA_DIR = "datasets"
-    DATA_DIR = "/home/jario/dataset"
+    DATA_DIR = defaults._C.DATA_DIR
 
     DATASETS = {
         "coco_2014_train": (
@@ -41,6 +42,8 @@ class DatasetCatalog(object):
 
 
 class ModelCatalog(object):
+    MODEL_DIR = defaults._C.MODEL_DIR
+
     S3_C2_DETECTRON_URL = "https://s3-us-west-2.amazonaws.com/detectron"
     C2_IMAGENET_MODELS = {
         "MSRA/R-50": "ImageNetPretrained/MSRA/R-50.pkl",
@@ -62,11 +65,20 @@ class ModelCatalog(object):
 
     @staticmethod
     def get(name):
+        if name.startswith("ModelDir"):
+            return ModelCatalog.get_model_in_local_disk(name)
         if name.startswith("Caffe2Detectron/COCO"):
             return ModelCatalog.get_c2_detectron_12_2017_baselines(name)
         if name.startswith("ImageNetPretrained"):
             return ModelCatalog.get_c2_imagenet_pretrained(name)
         raise RuntimeError("model not present in the catalog {}".format(name))
+
+    @staticmethod
+    def get_model_in_local_disk(name):
+        prefix = ModelCatalog.MODEL_DIR
+        name = name[len("ModelDir/"):]
+        path = "/".join([prefix, name])
+        return path
 
     @staticmethod
     def get_c2_imagenet_pretrained(name):
