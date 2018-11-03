@@ -29,9 +29,40 @@ sudo python setup.py build develop
 链接：https://pan.baidu.com/s/1QwoWSHDzVCGLYZZQORneyQ 
 提取码：8whc 
 
+R-50.pkl, R-101.pkl为训练新数据集所需, 其他为COCO数据集训练好的模型
+将下载好的权重放到同一个目录下
+修改maskrcnn-benchmark/maskrcnn_benchmark/config/defaults.py中268行
+```bash
+_C.MODEL_DIR = "权重存放的路径"
+```
+
 ## Label your data, 标注自己的数据
 
-下载标注软件
+下载标注软件:
+链接：https://pan.baidu.com/s/1B-RE2bcQvhEslnki9bNN1A 
+提取码：17vc 
+设置标注工作空间, 打开图像(如果数据为视频，可通过tools->video2image转换), 选择标注类型，即可开始
+![alt text](demo/label_tools_01.jpg)
+方框标注, 用于Faster R-CNN
+![alt text](demo/label_tools_02.jpg)
+实例分割标注, 用于Mask R-CNN
+![alt text](demo/label_tools_03.jpg)
+
+## Start Training, 开始训练
+
+以Faster R-CNN为例
+修改maskrcnn-benchmark/configs/e2e_faster_rcnn_R_50_FPN_1x.yaml
+```bash
+DATASETS:
+  TRAIN: ("BB180913_vis_drone_train",)  # 标注工具中save path的文件夹名, 用于训练
+  TEST: ("BB180913_vis_drone_val",)     # 同上, 用于测试
+DATA_DIR: "标注工具中, save path的父路径"
+OUTPUT_DIR: "训练结果保存的路径"
+```
+在终端的maskrcnn-benchmark路径下, 执行
+```bash
+python tools/train_net.py --config-file configs/e2e_faster_rcnn_R_50_FPN_1x.yaml
+```
 
 
 ![alt text](demo/demo_e2e_mask_rcnn_X_101_32x8d_FPN_1x.png "from http://cocodataset.org/#explore?id=345434")
