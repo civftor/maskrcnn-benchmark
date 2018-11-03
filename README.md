@@ -3,6 +3,37 @@
 This project aims at providing the necessary building blocks for easily
 creating detection and segmentation models using PyTorch 1.0.
 
+## How to install, 安装教程 (Suppose you have installed PyTorch 1.0)
+
+1. 参考官方说明安装[Pytorch 1.0](https://pytorch.org/)
+2. 安装依赖项
+```bash
+sudo pip install torchvision ninja yacs cython matplotlib tqdm
+```
+3. 安装pycocotools(COCO数据解析依赖)
+```bash
+cd ~/github
+git clone https://github.com/cocodataset/cocoapi.git
+cd cocoapi/PythonAPI
+sudo python setup.py build_ext install
+```
+4. 安装maskrcnn-benchmark
+```bash
+git clone https://github.com/jario-jin/maskrcnn-benchmark.git
+cd maskrcnn-benchmark
+sudo python setup.py build develop
+
+```
+## Download benchmark models from chinese cloud, 百度网盘下载预训练权重文件
+
+链接：https://pan.baidu.com/s/1QwoWSHDzVCGLYZZQORneyQ 
+提取码：8whc 
+
+## Label your data, 标注自己的数据
+
+下载标注软件
+
+
 ![alt text](demo/demo_e2e_mask_rcnn_X_101_32x8d_FPN_1x.png "from http://cocodataset.org/#explore?id=345434")
 
 ## Highlights
