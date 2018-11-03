@@ -38,6 +38,18 @@ class DatasetCatalog(object):
                 factory="COCODataset",
                 args=args,
             )
+        else:
+            data_dir = DatasetCatalog.DATA_DIR            
+            if os.path.exists(os.path.join(data_dir, name)):
+                args = dict(
+                    save_path=os.path.join(data_dir, name),
+                    img_dir='scaled_images', 
+                    ann_dir='annotations',
+                )
+                return dict(
+                    factory="SpireDataset",
+                    args=args,
+                )
         raise RuntimeError("Dataset not available: {}".format(name))
 
 

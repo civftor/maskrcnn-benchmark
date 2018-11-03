@@ -20,8 +20,8 @@ MODEL:
     FEATURE_EXTRACTOR: "FPN2MLPFeatureExtractor"
     PREDICTOR: "FPNPredictor"
 DATASETS:
-  TRAIN: ("coco_2014_train",)
-  TEST: ("coco_2014_val",)
+  TRAIN: ("BB180913_vis_drone_train",)  # ("coco_2014_train",)
+  TEST: ("BB180913_vis_drone_val",)     # ("coco_2014_val",)
 DATALOADER:
   SIZE_DIVISIBILITY: 32
 SOLVER:
@@ -29,8 +29,8 @@ SOLVER:
   WEIGHT_DECAY: 0.0001
   STEPS: (60000, 80000)  # (480000, 640000) / Num-of-GPUs (e.g. 8 GPUs (60000, 80000))
   MAX_ITER: 90000        # 720000 / Num-of-GPUs (e.g. 8 GPUs 90000)
-  IMS_PER_BATCH: 2       # 2 * Num-of-GPUs (e.g. 8 GPUs 16)
+  IMS_PER_BATCH: 1       # 2 * Num-of-GPUs (e.g. 8 GPUs 16)
 TEST:
   IMS_PER_BATCH: 1
-DATA_DIR: "/home/jario/dataset"
+DATA_DIR: "/media/jario/949AF0D79AF0B738/Dataset/spire_dataset"
 OUTPUT_DIR: "/tmp/maskrcnn_benchmark"
