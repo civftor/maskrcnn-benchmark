@@ -43,8 +43,7 @@ class DatasetCatalog(object):
             if os.path.exists(os.path.join(data_dir, name)):
                 args = dict(
                     save_path=os.path.join(data_dir, name),
-                    img_dir='scaled_images', 
-                    ann_dir='annotations',
+                    img_dir='scaled_images',
                 )
                 return dict(
                     factory="SpireDataset",

@@ -5,65 +5,60 @@ import torch
 import torchvision
 import torch.utils.data as data
 from maskrcnn_benchmark.structures.bounding_box import BoxList
+from maskrcnn_benchmark.structures.segmentation_mask import SegmentationMask
 
-class SpireDataset(data.Dataset):
-    def __init__(self, save_path, img_dir, ann_dir, transforms=None, ):
-        # as you would do normally
-        ann_path = os.path.join(save_path, ann_dir)
-        img_path = os.path.join(save_path, img_dir)
-        anns = os.listdir(ann_path)
-        self.root = save_path
-        self.img_path = img_path
-        self.anns = []
-        self.categories = []
-        for ann in anns:
-            _, ext = os.path.splitext(ann)
-            if ext == '.json':
-                with open(os.path.join(ann_path, ann), 'r') as load_f:
-                    load_dict = json.load(load_f)
-                    file_name = load_dict['file_name']
-                    height = load_dict['height']
-                    width = load_dict['width']
-                    # print("{}, {}, {}".format(file_name, height, width))
-                    ann_list = load_dict['annos']
-                    # print(len(ann_list))
-                    if len(ann_list) > 0:
-                        self.anns.append(load_dict)
-                        for each_ann in ann_list:
-                            if each_ann['category_name'] not in self.categories:
-                                self.categories.append(each_ann['category_name'])
-                            each_ann['category_id'] = self.categories.index(each_ann['category_name'])
+class SpireDataset(torchvision.datasets.coco.CocoDetection):
+    def __init__(
+        self, save_path, img_dir, remove_images_without_annotations, transforms=None
+    ):
+        for f in os.listdir(save_path):
+            f_full = os.path.join(save_path, f)
+            if f.startswith("COCO") and os.path.isfile(f_full):
+                ann_file = f_full
 
+        root = os.path.join(save_path, img_dir)
+        super(SpireDataset, self).__init__(root, ann_file)
+
+        # sort indices for reproducible results
+        self.ids = sorted(self.ids)
+
+        # filter images without detection annotations
+        if remove_images_without_annotations:
+            self.ids = [
+                img_id
+                for img_id in self.ids
+                if len(self.coco.getAnnIds(imgIds=img_id, iscrowd=None)) > 0
+            ]
+
+        self.json_category_id_to_contiguous_id = {
+            v: i + 1 for i, v in enumerate(self.coco.getCatIds())
+        }
+        self.contiguous_category_id_to_json_id = {
+            v: k for k, v in self.json_category_id_to_contiguous_id.items()
+        }
+        self.id_to_img_map = {k: v for k, v in enumerate(self.ids)}
         self.transforms = transforms
+        # print(self.json_category_id_to_contiguous_id)
 
-    def get_categories(self):
-        return self.categories
-
-    def __len__(self):
-        return len(self.anns)
-    
     def __getitem__(self, idx):
-        img_name = self.anns[idx]['file_name']
-        # load the image as a PIL Image
-        img = Image.open(os.path.join(self.img_path, img_name)).convert('RGB')
-        anno = self.anns[idx]['annos']
+        img, anno = super(SpireDataset, self).__getitem__(idx)
 
-        # load the bounding boxes as a list of list of boxes
-        # in this case, for illustrative purposes, we use
-        # x1, y1, x2, y2 order.
+        # filter crowd annotations
+        # TODO might be better to add an extra field
+        anno = [obj for obj in anno if obj["iscrowd"] == 0]
+
         boxes = [obj["bbox"] for obj in anno]
         boxes = torch.as_tensor(boxes).reshape(-1, 4)  # guard against no boxes
         target = BoxList(boxes, img.size, mode="xywh").convert("xyxy")
 
         classes = [obj["category_id"] for obj in anno]
-        # classes = [self.json_category_id_to_contiguous_id[c] for c in classes]
+        classes = [self.json_category_id_to_contiguous_id[c] for c in classes]
         classes = torch.tensor(classes)
         target.add_field("labels", classes)
 
-        if anno[0].has_key("segmentation") and len(anno[0]["segmentation"]) > 0:
-            masks = [obj["segmentation"] for obj in anno]
-            masks = SegmentationMask(masks, img.size)
-            target.add_field("masks", masks)
+        masks = [obj["segmentation"] for obj in anno]
+        masks = SegmentationMask(masks, img.size)
+        target.add_field("masks", masks)
 
         target = target.clip_to_image(remove_empty=True)
 
@@ -72,17 +67,12 @@ class SpireDataset(data.Dataset):
 
         return img, target, idx
 
-    def __repr__(self):
-        fmt_str = 'Dataset ' + self.__class__.__name__ + '\n'
-        fmt_str += '    Number of datapoints: {}\n'.format(self.__len__())
-        fmt_str += '    Root Location: {}\n'.format(self.root)
-        tmp = '    Transforms (if any): '
-        fmt_str += '{0}{1}\n'.format(tmp, self.transforms.__repr__().replace('\n', '\n' + ' ' * len(tmp)))
-        return fmt_str
+    def get_img_info(self, index):
+        img_id = self.id_to_img_map[index]
+        img_data = self.coco.imgs[img_id]
+        return img_data
 
-    def get_img_info(self, idx):
-        # get img_height and img_width. This is used if
-        # we want to split the batches according to the aspect ratio
-        # of the image, as it can be more efficient than loading the
-        # image from disk
-        return {"height": self.anns[idx]['height'], "width": self.anns[idx]['width']}
+
+if __name__ == '__main__':
+    dataset = SpireDataset('/media/jario/949AF0D79AF0B738/Dataset/spire_dataset/SEG180412_aerial_red_car',
+        'scaled_images', 'annotations')

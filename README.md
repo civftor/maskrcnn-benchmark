@@ -29,12 +29,9 @@ sudo python setup.py build develop
 链接：https://pan.baidu.com/s/1QwoWSHDzVCGLYZZQORneyQ 
 提取码：8whc 
 
-R-50.pkl, R-101.pkl为训练新数据集所需, 其他为COCO数据集训练好的模型
-
-将下载好的权重放到同一个目录下
+R-50.pkl, R-101.pkl为训练新数据集所需, 其他为COCO数据集训练好的模型, 将下载好的权重放到同一个目录下
 
 修改maskrcnn-benchmark/maskrcnn_benchmark/config/defaults.py中268行
-
 ```bash
 _C.MODEL_DIR = "权重存放的路径"
 ```
@@ -43,8 +40,8 @@ _C.MODEL_DIR = "权重存放的路径"
 
 下载标注软件:
 
-链接：https://pan.baidu.com/s/1B-RE2bcQvhEslnki9bNN1A 
-提取码：17vc 
+链接：https://pan.baidu.com/s/196x3tbpPV7vdJqsXfONk3g 
+提取码：mnsc 
 
 设置标注工作空间, 打开图像(如果数据为视频，可通过tools->video2image转换), 选择标注类型，即可开始
 ![alt text](demo/label_tools_01.jpg)
@@ -52,6 +49,8 @@ _C.MODEL_DIR = "权重存放的路径"
 ![alt text](demo/label_tools_02.jpg)
 实例分割标注, 用于Mask R-CNN
 ![alt text](demo/label_tools_03.jpg)
+
+标注完成后, 按Ctrl+O, 确定，将结果按COCO形式输出
 
 ## Start Training, 开始训练
 
@@ -69,7 +68,23 @@ OUTPUT_DIR: "训练结果保存的路径"
 python tools/train_net.py --config-file configs/e2e_faster_rcnn_R_50_FPN_1x.yaml
 ```
 
-## Detection demo
+## How to deploy, 那么如何利用摄像头查看模型效果呢
+
+将训练好的权重放到上面自己定义的模型目录中，修改对应的部署配置文件，以Faster R-CNN R-50为例
+
+maskrcnn-benchmark/configs/caffe2/e2e_faster_rcnn_R_50_FPN_1x_caffe2.yaml, 修改第2行
+```bash
+WEIGHT: "catalog://ModelDir/训练好的权重文件名称.pth"
+```
+打开maskrcnn-benchmark/demo/webcam.py, 修改第15行, 指向刚才的部署配置, 运行命令
+```bash
+cd demo
+python webcam.py --min-image-size 300
+```
+如果发现标签不对应, 需要修改maskrcnn-benchmark/demo/predictor.py中的标签名称
+
+
+## Detection DEMO
 
 ![alt text](demo/demo_e2e_mask_rcnn_X_101_32x8d_FPN_1x.png "from http://cocodataset.org/#explore?id=345434")
 
